@@ -67,8 +67,8 @@ do
         cat  $correctedFile  >>$kmer.corrected.fastq
         #echo $correctedFile 
     else
-        echo $i":        unsuccessful error correction by brownie due to the low coverage of the reads in this cluster"
-        #cat  $i/$i.fastq  >>$kmer.corrected.fastq
+        #echo $i":        unsuccessful error correction by brownie due to the low coverage of the reads in this cluster"
+        cat  $i/$i.fastq  >>$kmer.corrected.fastq
      fi
    fi
 done
