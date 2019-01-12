@@ -1,5 +1,7 @@
 #!/bin/bash
-    #Copyright (C) <2019> Mahdi Heydari <mahdi.heydari@ugent.be>
+
+
+    #Copyright (C) <2019>  <mahdi.heydari@ugent.be>
 
     #This program is free software: you can redistribute it and/or modify
     #it under the terms of the GNU Affero General Public License as published
@@ -13,6 +15,9 @@
 
     #You should have received a copy of the GNU Affero General Public License
     #along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    
+    #
+
 if [ -z "$1" ]
   then
     echo "No argument supplied for the input read file (fastq file) "
@@ -37,6 +42,7 @@ fi
  workDir=$3 
 
 ############ 0.2. Set default parameters 
+
  iteration=20
  SOURCE="${BASH_SOURCE[0]}"
  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -48,6 +54,7 @@ fi
  
 ############ 1. kmer selection, kmer length should be and odd number. 
  pattern="AAAAAAAAAAAAAAA"
+ #pattern="CCCCCCCCCCCCCCC"
  echo '>1' > $KmerFile
  echo $pattern >>$KmerFile
  kmer=${#pattern}
@@ -65,13 +72,13 @@ fi
  ##### 3.1. Calclulate the similarity score between read pairs. 
  $DIR/calsimbrownieAligner.sh $readFile $kmer $cov $workDir $staFile
  
- ##### 3.2. Do the clustering with Louvain community detection algorithm multiple times,  and then extract the stable cores 
- clusteringfileName=$workDir/"louvain.txt" # keeps the cluster number for each read (in pair).
- $DIR/louvain.sh $readFile $cov $iteration $workDir $staFile $clusteringfileName
- python3 $DIR/../pythonScripts/extractClusters.py $readFile $workDir/clusters $clusteringfileName $workDir/labelList.txt $workDir/network_0.dat
+ ##### 3.2. Do the clustering with Louvain community detection algorithm. 
+
+ $DIR/louvain.sh $readFile $cov $iteration $workDir $staFile
+ 
+ fileName=$workDir/"louvain.txt"
+ python3 $DIR/../pythonScripts/extractClusters.py $readFile $workDir/clusters $fileName $workDir/labelList.txt $workDir/network_0.dat
  
  ############  4.Correct each cluster with brownie
  $DIR/brownie.sh $workDir $kmer
-
- ############  concatenate corrected reads from all clusters and normal untouched reads
  cat $normalFile $workDir/brownie.corrected.fastq >$outputFile

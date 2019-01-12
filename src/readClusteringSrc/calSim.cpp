@@ -33,23 +33,8 @@
 #include <assert.h>
 
 using namespace std;
-inline vector<string> splitString(const string str, const char delimiter)
-{
-        
-        vector<string> parsed;
-        size_t pos = 0;
-        while (true) {
-                size_t colon = str.find(delimiter, pos);
-                if (colon == ::std::string::npos) {
-                        parsed.push_back(str.substr(pos));
-                        break;
-                } else {
-                        parsed.push_back(str.substr(pos, colon - pos));
-                        pos = colon + 1;
-                }
-        }
-        return parsed;
-}
+
+
 inline double round( double val )
 {
         if( val < 0 ) return ceil(val - 0.5);
@@ -62,7 +47,6 @@ inline string findBetween(string str, string firstStr, string lastStr){
         string strBet = str.substr (first+ firstStr.length(),last-first -lastStr.length());
         return strBet;
 }
-
 calSim::calSim( string readFilename, string ncfFile_,string nodeFile_, size_t kmerSize_, string readNodeAssFile_  , double initialCov_,string staFile):kmerSize(kmerSize_), initialCov(initialCov_), avg_readLength(100), maxReadLen(100){
         numThreads = std::thread::hardware_concurrency();
        
@@ -71,10 +55,7 @@ calSim::calSim( string readFilename, string ncfFile_,string nodeFile_, size_t km
         numOfReads = readNodeSetRefined.size() ;
         uploadStatisticFromFile(staFile);
         readSequences(readFilename, readPairs);
-        
 }
-
-
 void calSim::setNodeLen(string nodeFile){
         
         std::ifstream ifs(nodeFile.c_str());
@@ -88,7 +69,7 @@ void calSim::setNodeLen(string nodeFile){
                         break;
                 }
                 if (lineNum % 2 == 0){
-                        vector<string> firstList = splitString(line, '\t');
+                        vector<string> firstList =Util::splitString(line, '\t');
                         double cov = stof (firstList[3])/(stof(firstList[2]) -kmerSize +1);
                         kmerNodeCov [stoi(firstList[1])] = cov;
                         nodeLenVec.push_back(stof(firstList[2]));
@@ -99,50 +80,6 @@ void calSim::setNodeLen(string nodeFile){
         }
         ifs.close();
 }
-
-
-void calSim::setExpectedCov(float threshold , vector <pair < double , double> > & coverageVec){
-        
-        float e =.01 ; 
-        double errorEffect = pow(1-e , 15 );
-        
-        coverage = round (errorEffect *(avg_readLength-15+1)*initialCov/avg_readLength) ;
-        
-        size_t minminCov = 2 ;
-        
-        cout << "initial coverage is : "  << coverage <<endl;;
-        size_t l = kmerSize ;
-        while (l< avg_readLength){
-                errorEffect = pow(1-e , l );
-                double c_k = round (errorEffect *(avg_readLength-l+1)*coverage/avg_readLength);
-                double coverageAvg = (c_k /2 + c_k )/2 ;
-                
-                double maxNodeCov = ceil  (c_k  +   sqrt(coverageAvg)  + threshold*sqrt(coverageAvg)  );
-                double minNodeCov = floor (c_k /2 - sqrt(coverageAvg));
-                
-                if (minNodeCov - threshold*sqrt(coverageAvg) >= minminCov){
-                        minNodeCov = minNodeCov - threshold*sqrt(coverageAvg);
-                        
-                } 
-                else {
-                        minNodeCov = minminCov ;
-                        
-                }
-                
-                if (l == kmerSize){
-                        cout << "The accepted coverage interval for nodes of size " << l <<endl;
-                        cout << "[ " << minNodeCov << " ,  " << maxNodeCov << "] " << endl;
-                }
-                if (maxNodeCov - minNodeCov < 1){
-                        break;
-                }
-                coverageVec.push_back (make_pair(minNodeCov,maxNodeCov));
-                l = l + 1;
-        }
-        
-}
-
-
 void calSim:: setReadNodeSet(string  ncfFile , std::vector< pair< set<size_t> , set<size_t>>>& readNodeSet ){
         
         string firstLine = "" ;
@@ -165,12 +102,12 @@ void calSim:: setReadNodeSet(string  ncfFile , std::vector< pair< set<size_t> , 
                         secodnLine = line;
                         string firstStr   = findBetween(firstLine, "C(", ")C");
                         string secondStr  = findBetween(secodnLine, "C(", ")C");
-                        vector<string> firstList = splitString(firstStr, ' ');
-                        vector<string> secondList = splitString(secondStr, ' ');
+                        vector<string> firstList =Util::splitString(firstStr, ' ');
+                        vector<string> secondList = Util::splitString(secondStr, ' ');
                         string firstPos   = findBetween(firstLine, "P(", ")P");
                         string secondPos  = findBetween(secodnLine, "P(", ")P");
-                        vector<string> firstPosList  = splitString(firstPos, ',');
-                        vector<string> secondPosList = splitString(secondPos, ',');
+                        vector<string> firstPosList  = Util::splitString(firstPos, ',');
+                        vector<string> secondPosList = Util::splitString(secondPos, ',');
                         int pos1 = stoi( firstPosList[0]);
                         int pos2 = stoi( secondPosList[0]);
                         set <size_t> firstNodeSet ;
@@ -179,16 +116,6 @@ void calSim:: setReadNodeSet(string  ncfFile , std::vector< pair< set<size_t> , 
                         calEndpointLen(secondList, pos2, endpoints , secondNodeSet);
                         readNodeSet.push_back( make_pair( firstNodeSet, secondNodeSet));
                         readNodeSetEndPointsLen.push_back(endpoints);
-                        /*cout << firstLine <<endl;
-                        cout << secodnLine <<endl;
-                        for (auto it:endpoints){
-                                cout <<"nodeID " <<it.first << "\t, overlap size:"<<it.second <<endl;
-                        }
-                        if (num> 100)
-                                exit(0);
-                        else{
-                                cout << "--------------------------" <<endl;
-                        }*/
                 }
                 num ++; 
         }
@@ -253,8 +180,8 @@ void calSim::writeNodeReadAssInFile(string readNodeAssFile){
 }
 void calSim:: setRefinedReadNodeSet(string ncfFile,string readNodeAssFile ){
         
-        float e =.01 ; 
-        double  errorEffect = pow(1-e , kmerSize );
+         
+        double  errorEffect = pow(1-errorRate , kmerSize );
         coverage = round (errorEffect *(avg_readLength-kmerSize+1)*initialCov/avg_readLength) ;
         double c_k = round (errorEffect *(avg_readLength-kmerSize+1)*coverage/avg_readLength);
         double minCov = c_k/2 - sqrt(c_k/2)*3 < 2 ? 2: c_k/2- sqrt(c_k/2)*3; 
@@ -438,74 +365,7 @@ void calSim::calSimThread(size_t threadID, std::mutex &mergeMutex ){
         lock.unlock();
         
 }
-vector<pair < pair<size_t, size_t> , double >> calSim::calSimForRead (size_t i , size_t numOfReads ){
-        
-        size_t j = i+1;
-        vector<pair < pair<size_t, size_t> , double >> edgeList_i ;
-        vector <size_t > firstSet = readNodeSetRefined[i-1];
-        if ( firstSet.size() == 0 )
-                return edgeList_i;
-        while (j <= numOfReads){
-                vector <size_t > secondSet = readNodeSetRefined[j-1];
-                if (secondSet.size() == 0 ){
-                        j = j + 1;
-                        continue;
-                }
-                vector <size_t > intersection  = intersectionOfTwoSortedVe(firstSet, secondSet);
-                if (intersection.size() == 0 ){
-                        j = j + 1 ;
-                        continue;
-                }
-                vector <size_t > unionSet =  unionOfTwoSortedVe(firstSet, secondSet);
-                vector<pair <size_t , size_t>> firstEndPonts ;
-                vector<pair <size_t , size_t>> secondEndPonts ;
-                firstEndPonts = readNodeSetEndPointsLen[i-1];
-                secondEndPonts = readNodeSetEndPointsLen[j-1];
-                double sim = 0.0 ;
-                double maxSim = 0.0;
-                for (auto node : unionSet){
-                        double nodeSim = 0;
-                        double firstLen = 0, secondLen  = 0;
-                        bool isFirstEndPoint = false;
-                        bool isSecondEndPoint = false;
-                        for (auto it : firstEndPonts ){
-                                if (it.first == node){
-                                        firstLen = it.second ;
-                                        isFirstEndPoint = true;
-                                        break;
-                                }
-                        }
-                        
-                        for (auto it : secondEndPonts ){
-                                if (it.first == node){
-                                        secondLen = it.second ;
-                                        isSecondEndPoint = true;
-                                        break;
-                                }
-                        }        
-                                                
-                        if (!isFirstEndPoint && !isSecondEndPoint )
-                                nodeSim = nodeLenVec[node-1] - kmerSize + 1 ;
-                        else 
-                                nodeSim = min (firstLen, secondLen);
 
-                        //nodeSim = nodeSim / double(coverage);
-                        maxSim  = maxSim + nodeSim;
-                        std::vector<size_t>::iterator it;
-                        it = find (intersection.begin(), intersection.end(), node);
-                        if (it != intersection.end()){
-                                sim  = sim + nodeSim;
-                        }
-                }
-                //double ratio = maxSim/ (2*avg_readLength - 2*kmerSize+2);
-                sim =  ( double (sim) / double(maxSim)) ;
-                sim = sim *100;
-                if (sim > 0)
-                        edgeList_i.push_back(make_pair( make_pair(i, j), sim));
-                j = j+1;
-        }
-        return edgeList_i;
-}
 vector<pair < pair<size_t, size_t> , double >> calSim::calAliSimForRead (size_t i , size_t numOfReads ){
         
         size_t j = i+1;
@@ -570,41 +430,6 @@ void calSim::readSequences(const string& filename, vector<ReadPair>& readPairs)
 }
 
 
-double calSim::getSim(vector <size_t >& commonSet,vector<pair <size_t , size_t>>& firstEndPonts,vector<pair <size_t , size_t>>& secondEndPonts){
-        double sim = 0.0 ;
-        for (auto node : commonSet){
-                double nodeSim = 0;
-                double firstLen = 0, secondLen  = 0;
-                bool isFirstEndPoint = false;
-                bool isSecondEndPoint = false;
-                for (auto it : firstEndPonts ){
-                        if (it.first == node){
-                                firstLen = it.second ;
-                                isFirstEndPoint = true;
-                                break;
-                        }
-                }
-                
-                for (auto it : secondEndPonts ){
-                        if (it.first == node){
-                                secondLen = it.second ;
-                                isSecondEndPoint = true;
-                                break;
-                        }
-                }        
-                
-                if (!isFirstEndPoint && !isSecondEndPoint )
-                        nodeSim = nodeLenVec[node-1] - kmerSize + 1 ;
-                else {
-                        if (isFirstEndPoint && isSecondEndPoint )
-                                nodeSim = min (firstLen, secondLen);
-                        else 
-                                nodeSim = max (firstLen, secondLen);
-                }  
-               sim  = sim + nodeSim;
-        }
-        return sim;
-}
 
 void calSim::uploadStatisticFromFile(string fileName){
         std::ifstream ifs(fileName.c_str());
@@ -614,7 +439,7 @@ void calSim::uploadStatisticFromFile(string fileName){
                 string line = "";
                 
                 std::getline(ifs, line);
-                vector<string> items = splitString(line,':');
+                vector<string> items = Util::splitString(line,':');
                 if(items[0]==  "NumOfReads"){
                         totalNumOfReads = atoi (items[1].c_str())/2;
                 }
@@ -631,36 +456,7 @@ void calSim::uploadStatisticFromFile(string fileName){
         cout << "Max read length: " <<maxReadLen <<endl;
         ifs.close();
 }
-void readSequences(const string& filename, vector<ReadPair>& readPairs)
-{
-        ifstream ifs(filename.c_str());
-        if (!ifs)
-                throw runtime_error("Could not open file: " + filename);
 
-        string qname1, read1, qname2, read2, dummy;
-        while (ifs) {
-                getline(ifs, qname1);     // qname 1
-                if (qname1.empty())
-                        continue;
-                if (qname1.front() != '@')
-                        throw runtime_error("File: " + filename + " is not an interleaved FASTQ file");
-                getline(ifs, read1);     // read 1
-                transform(read1.begin(), read1.end(), read1.begin(), ::toupper);
-                getline(ifs, dummy);     // + sign
-                getline(ifs, dummy);     // quality scores 1
-
-                getline(ifs, qname2);     // qname 1
-                if (qname2.front() != '@')
-                        throw runtime_error("File: " + filename + " is not an interleaved FASTQ file");
-                getline(ifs, read2);     // read 2
-                transform(read2.begin(), read2.end(), read2.begin(), ::toupper);
-                getline(ifs, dummy);     // + sign
-                getline(ifs, dummy);     // quality scores 2
-                if (qname1 != qname2)
-                        throw runtime_error("File: " + filename + " is not an interleaved FASTQ file");
-                readPairs.push_back(ReadPair(read1, read2));
-        }
-}
 int Alinger::computeScore(const ReadPair& p1, const ReadPair& p2)
 {
         // forward forward alignment

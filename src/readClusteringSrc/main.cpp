@@ -181,20 +181,7 @@ int main(int argc, char ** args)
 
                         
                 }
-               /* case clusteringCom :{
-                        if (argc < 6) {
-                                cout << "ERROR: Wrong number of arguments!\n";
-                                cout << "clustering networkFile(input) clusteringFile(output) numOfNodes maxCutOffThreashold optimalClusterSize \n";
-                                return 0;
-                        }
-                        string networkFile = args[2];
-                        string outFileName = args[3];
-                        unsigned int numOfNodes =  atoi( args[4]);                         
-                        float maxCutOffThreashold = stof (args[5]) ;
-                        unsigned int optimalClusterSize = atoi (args[6]) ;
-                        undGraph g (numOfNodes , networkFile);
-                        g.hierarchicalClustering(numOfNodes,maxCutOffThreashold,optimalClusterSize,outFileName );
-                }  */
+
                 
         }
         

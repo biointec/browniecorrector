@@ -229,6 +229,7 @@ private:
         undGraph simNetwork;
         size_t numThreads;                              // Number of threads
         unsigned int numOfNodes;                        // Number of nodes in the graph
+        float e =.02 ;                                  //error rate
         /**
          * reads the clustering file an fill the dictionary data structure
          * @param fileName the clustering file name

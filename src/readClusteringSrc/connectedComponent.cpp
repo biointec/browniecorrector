@@ -272,7 +272,7 @@ int graphHandler::getOptimalClusterSize(double coverage, string staFileName)
         ifs.close(); 
         cout << "Avarage read length: " << avg_readLength <<endl;
         
-        float e =.01 ; 
+         
         double errorEffect = pow(1-e , kmerSize );
         optimalClusterSize = round (errorEffect *(avg_readLength-kmerSize+1)*coverage/avg_readLength) ;
         cout << " The optimal cluster size is:\t" << optimalClusterSize <<endl;

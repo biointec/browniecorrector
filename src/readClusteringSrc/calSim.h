@@ -1,6 +1,3 @@
-
-
-
 /************************************************************************************
 *    Copyright (C) <2018> Mahdi Heydari <mahdi.heydari@ugent.be>                    *    
 *                                                                                   *
@@ -146,20 +143,21 @@ class calSim
 {
         
 private:
-        size_t kmerSize;                                                //the kmer size which the graph is built with
-        double initialCov;                                              // the initial coverage of the data set
-        vector<size_t> nodeLenVec;                                      //vector contains lenght of nodes
-        std::vector< vector<size_t> > readNodeSetRefined;               //for every read, keeps the associated valid nodes 
-        std::vector< pair< vector<size_t>, vector<size_t>> > readNodeSetRefinedPair;  //for every read, keeps the associated valid nodes for each pair separately
-        std::vector< vector < pair<size_t , size_t>> > readNodeSetEndPointsLen;   //for every read, for the last and first nodes keeps the aligned reads 
-        vector<pair < pair<size_t, size_t> , double >> edgeList_all;    // the similarity score list, for each two reads there is one score
-        size_t numThreads;                                              // number of threads 
-        size_t numOfReads;                                              // number of reads (pairs) in the data set
-        double coverage;
-        double avg_readLength;
-        size_t totalNumOfReads;
-        size_t maxReadLen;
+        size_t kmerSize;                                                              // the kmer size which the graph is built with
+        double initialCov;                                                            // the initial coverage of the data set
+        vector<size_t> nodeLenVec;                                                    // vector contains lenght of nodes
+        std::vector< vector<size_t> > readNodeSetRefined;                             // for every read, keeps the associated valid nodes 
+        std::vector< pair< vector<size_t>, vector<size_t>> > readNodeSetRefinedPair;  // for every read, keeps the associated valid nodes for each pair separately
+        std::vector< vector < pair<size_t , size_t>> > readNodeSetEndPointsLen;       // for every read, for the last and first nodes keeps the aligned reads 
+        vector<pair < pair<size_t, size_t> , double >> edgeList_all;                  // the similarity score list, for each two reads there is one score
+        size_t numThreads;                                                            // number of threads 
+        size_t numOfReads;                                                            // number of reads (pairs) in the data set
+        double coverage;                                                              // the coverage of the dataset, given by the user
+        double avg_readLength;                                                        // the average lenght of the reads,  it is saved in a file and needs to be read
+        size_t totalNumOfReads;                                                       // the total number of reads in the dataset.  it is saved in a file and needs to be read
+        size_t maxReadLen;                                                            // the maximimum lenght of reads in the dataset.  it is saved in a file and needs to be read
         vector<ReadPair> readPairs;
+        float errorRate =.02 ;                                                                 // error rate
         Alinger aligner;
         std::map<size_t,size_t> kmerNodeCov;    
         
@@ -174,16 +172,16 @@ private:
          * @param threshold  the accepted range of coverage is added to this value (for the lower bound is subtracted)
          * @param coverageVec for each lenght > minNodeLen keeps the accepted range of coverage 
          **/
-        void setExpectedCov(float threshold , vector <pair < double , double> > & coverageVec);
+
         /**
-         * based on the accepted coverage interval, for each read find the set of valid nodes that alined to
-         * @param ncfFile the input alignment file, for each read keeps all the alined node
-         * @param readNodeAssFile ouput file , to store the association of reads and ndoes (refined version of ncfFile)
-         * 
+         * for every read keeps the associated set of ndoes that aligns to
+         * @param ncfFile the file name, keeps the alignment info of reads to the nodes, given by the user
+         * @param readNodeSet the return map , keeps the association
          * */
-        
         void  setReadNodeSet(string  ncfFile , std::vector< pair< set<size_t> , set<size_t>>>& readNodeSet );
-        
+        /**
+         * finds nodes which are at the endpoints of read alignment. only the aligned size of these nodes neeeds to be incoroporated not the whole lenght
+         * */
         void  calEndpointLen(vector<string>  nodeList, int pos, vector <pair<size_t , size_t>> &endpoints , set <size_t> &nodeSet);
         void  setRefinedReadNodeSet(string ncfFile ,string readNodeAssFile ); 
         
@@ -211,9 +209,9 @@ private:
          * @param i the id of the current read
          * @param numOfReads the total number of reads
          **/
-        vector<pair < pair<size_t, size_t> , double >> calSimForRead (size_t i , size_t numOfReads);
+ 
         vector<pair < pair<size_t, size_t> , double >> calAliSimForRead (size_t i , size_t numOfReads );
-        double getSim(vector <size_t >& commonSet,vector<pair <size_t , size_t>>& firstEndPonts,vector<pair <size_t , size_t>>& secondEndPonts);
+   
 
         /**
          * calculate the similarity score of those reads with other whose  read_id % numofthread == threadID

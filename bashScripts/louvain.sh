@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
     #Copyright (C) <2019>  <mahdi.heydari@ugent.be>
 
     #This program is free software: you can redistribute it and/or modify
@@ -20,37 +21,31 @@
 if [ -z "$1" ]
   then
     echo "No argument supplied for the input read file (fastq file) "
-    echo "correct usage : ./louvain readFile coverage iteration workDir staFile clusteringfileName"
+    echo "correct usage : ./louvain readFile coverage iteration workDir staFile"
     exit
 fi
 if [ -z "$2" ]
   then
     echo "No argument supplied for coverage"
-    echo "correct usage : ./louvain readFile  coverage iteration workDir staFile clusteringfileName"
+    echo "correct usage : ./louvain readFile  coverage iteration workDir staFile"
     exit
 fi
 if [ -z "$3" ]
   then
     echo "No argument supplied for iteration"
-    echo "correct usage : ./louvain readFile coverage iteration workDir staFile clusteringfileName"
+    echo "correct usage : ./louvain readFile coverage iteration workDir staFile"
     exit
 fi
 if [ -z "$4" ]
   then
     echo "No argument supplied for workDir"
-    echo "correct usage : ./louvain readFile coverage iteration workDir staFile clusteringfileName"
+    echo "correct usage : ./louvain readFile coverage iteration workDir staFile"
     exit
 fi
 if [ -z "$5" ]
   then
     echo "No argument supplied for staFile"
-    echo "correct usage : ./louvain readFile coverage iteration workDir staFile clusteringfileName"
-    exit
-fi
-if [ -z "$6" ]
-  then
-    echo "No argument supplied for clusteringfileName"
-    echo "correct usage : ./louvain readFile coverage iteration workDir staFile clusteringfileName"
+    echo "correct usage : ./louvain readFile coverage iteration workDir staFile"
     exit
 fi
 
@@ -63,7 +58,6 @@ coverage=$2
 iteration=$3
 workDir=$4
 staFile=$5
-clusteringfileName=$6
 ##############
 
 SOURCE="${BASH_SOURCE[0]}"
@@ -113,8 +107,8 @@ readNum=$((lineNum /8))
 konsule_output=$workDir/"connectedComp_output"
 konsule_output_err=$workDir/"connectedComp_err"
 
-     $DIR/../release/src/readclustering detectStableCommunity $clusteringfileName $coverage $staFile $readNum $fullNames  
-echo $DIR/../release/src/readclustering detectStableCommunity $clusteringfileName $coverage $staFile $readNum $fullNames 
+     $DIR/../release/src/readclustering detectStableCommunity $workDir/"louvain.txt" $coverage $staFile $readNum $fullNames  
+echo $DIR/../release/src/readclustering detectStableCommunity $workDir/"louvain.txt" $coverage $staFile $readNum $fullNames 
 i=1
 while [ $i -lt $iteration ]
 do
@@ -122,7 +116,8 @@ do
    rm $workDir/$i.louvain
    i=$[$i+1]
 done
-
+fileName=$workDir/"louvain.txt"
+echo $fileName
 mkdir -p $workDir/clusters
 rm -rf $workDir/clusters/*
 
