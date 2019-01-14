@@ -64,10 +64,14 @@ SOURCE="${BASH_SOURCE[0]}"
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 #############
 i=0
+networkFile=$workDir/network_0.dat
 while [ $i -lt $iteration ]
 do
    fileName="" 
-   $DIR/../release/src/convert -i $workDir/network_$i.dat -o $workDir/graph.bin -w $workDir/graph.weights
+   if [  -f $workDir/network_$i.dat  ]; then
+        networkFile=$workDir/network_$i.dat
+   fi
+   $DIR/../release/src/convert -i $networkFile -o $workDir/graph.bin -w $workDir/graph.weights
    $DIR/../release/src/louvain   $workDir/graph.bin -l -1 -q 0 -w $workDir/graph.weights > $workDir/graph.tree 2>$workDir/result
    j=1
    $DIR/../release/src/hierarchy $workDir/graph.tree -l $j > $workDir/graph_node2comm_level$j 
@@ -79,7 +83,10 @@ do
         j=$[$j+1]
         $DIR/../release/src/hierarchy $workDir/graph.tree -l $j > $workDir/graph_node2comm_level$j 
    done
-   rm $workDir/graph_node2comm_level$j
+   if [  -f $workDir/graph_node2comm_level$j ]; then
+         rm $workDir/graph_node2comm_level$j  
+   fi
+
    j=$[$j-1]
    k=1
    while [ $k -lt $j ]
@@ -87,13 +94,21 @@ do
         rm $workDir/"graph_node2comm_level"$k
         k=$[$k+1]
    done
-   rm $workDir/graph.bin
-   rm $workDir/graph.tree
-   rm $workDir/graph.weights
+   if [  -f $workDir/graph.bin ]; then
+         rm $workDir/graph.bin  
+   fi
+   if [  -f $workDir/graph.tree ]; then
+         rm $workDir/graph.tree  
+   fi
+   if [  -f $workDir/graph.weights ]; then
+         rm $workDir/graph.weights
+   fi
    mv $fileName $workDir/$i.louvain
    gap=" "
    modularity=$(head -n 1 $workDir/result)
-   rm $workDir/result
+   if [  -f $workDir/result ]; then
+         rm $workDir/result
+   fi
    minModularity=.5
    st=`echo "$modularity > $minModularity" | bc`
    if [ $st -eq 1 ] ; then
@@ -109,12 +124,16 @@ konsule_output_err=$workDir/"connectedComp_err"
 
      $DIR/../release/src/readclustering detectStableCommunity $workDir/"louvain.txt" $coverage $staFile $readNum $fullNames  
 echo $DIR/../release/src/readclustering detectStableCommunity $workDir/"louvain.txt" $coverage $staFile $readNum $fullNames 
-i=1
-while [ $i -lt $iteration ]
+i=$[$i-1]
+while [ $i -gt 0 ]
 do
-   rm $workDir/network_$i.dat
-   rm $workDir/$i.louvain
-   i=$[$i+1]
+   if [  -f $workDir/network_$i.dat ]; then
+        rm $workDir/network_$i.dat
+   fi
+   if [  -f $workDir/$i.louvain ]; then
+        rm $workDir/$i.louvain
+   fi
+   i=$[$i-1]
 done
 fileName=$workDir/"louvain.txt"
 echo $fileName

@@ -32,12 +32,14 @@ if [ -z "$2" ]
 fi
 workDir=$1
 kmer=$2  # the second argument is the kmer size
-
 previousDir=$(pwd)
-
-rm $workDir/brownie.corrected.fastq
+if [  -f $workDir/brownie.corrected.fastq ]; then
+        rm $workDir/brownie.corrected.fastq
+fi
 cd $workDir/clusters/
-rm $kmer.corrected.fastq
+if [  -f $kmer.corrected.fastq ]; then
+        rm $kmer.corrected.fastq
+fi
 kmerFile="kmer.txt"
 SOURCE="${BASH_SOURCE[0]}"
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -57,7 +59,9 @@ do
      correctedFile=$outdir$i.cor.fastq 
     if [ "$trimming" -eq "1" ]; then
         /usr/bin/time -v $DIR/../release/src/brownie index $i/$i.trimmed.fastq -p $outdir -k $newkmer -nMM -nMEM >> $i/$i.brownieOut 2>>$i/$i.brownieOut_err
-        rm $outdir/arcs.stage4
+        if [  -f $outdir/arcs.stage4 ]; then
+                rm $outdir/arcs.stage4
+        fi
         /usr/bin/time -v $DIR/../release/src/brownie assemble -o $correctedFile $i/$i.fastq -p $outdir -k $newkmer -nMM -nMEM -c $cutoff >> $i/$i.brownieOut 2>>$i/$i.brownieOut_err
     else         
         /usr/bin/time -v $DIR/../release/src/brownie assemble -t 64 -p $outdir -k $newkmer -o $correctedFile $i/$i.fastq -nMM -nMEM -c $cutoff > $outdir/$i.brownieOut 2>$outdir/$i.brownieOut_err
