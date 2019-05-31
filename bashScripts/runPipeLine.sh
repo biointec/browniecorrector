@@ -21,19 +21,19 @@
 if [ -z "$1" ]
   then
     echo "No argument supplied for the input read file (fastq file) "
-    echo "correct usage : ./brownieCorrection inputReadFile coverage tempDir "
+    echo "correct usage : ./runPipeLine.sh  inputReadFile coverage tempDir "
     exit
 fi
 if [ -z "$2" ]
   then
     echo "No argument supplied for data coverage"
-    echo "correct usage : ./brownieCorrection inputReadFile coverage tempDir "
+    echo "correct usage : ./runPipeLine.sh  inputReadFile coverage tempDir "
     exit
 fi
 if [ -z "$3" ]
   then
     echo "No argument supplied for tempDir"
-    echo "correct usage : ./brownieCorrection inputReadFile coverage tempDir "
+    echo "correct usage : ./runPipeLine.sh  inputReadFile coverage tempDir "
     exit
 fi
 ############ 0.1. Get input parameters

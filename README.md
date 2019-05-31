@@ -56,6 +56,26 @@ By executing ./brownie you will see
     Try 'brownie --help' for more information
 
 # Usage:
+To run BrownieCorrector, you need to run the runPipeLine.sh script in the bashScrips folder. You need to provide the script three arguments like this :
+
+    ./runPipeLine.sh  inputReadFile coverage tempDir
+    
+The first argument is inputReadFile is the Fastq file library in which the read pairs are interleaved.  Therefore two consecutive reads (one pair) must have an identical id. In case they have different tags, for example, @firstID/1 and @secondID/2,  remove the /1 and /2.  Also, please make sure that the file contains reads from a single library (same insert size). 
+
+The second argument is the coverage of the library. If you don't have the coverage but you know the approximate genome size you can compute the coverage like this: C = LN / G.
+    • C stands for coverage
+    • G is the genome length
+    • L is the read length
+    • N is the number of reads
+The third argument is the working directory to keep the temporary files and the results.
+
+Inside the runPipeLine.sh file you can change some parameters. For example, you can change the pattern from "AAAAAAAAAAAAAAA" to other patterns. Please make sure that the length of this pattern should be an odd number. The pipeline has four states :
+
+1. Extract reads:  it loops over the library and extracts all the pairs that contain the given pattern.
+2. Compute similarity score: it computes the similarity score between all pairs. Overlap alignment is used to find the similarity score. Because this process is quadratic and time-consuming (finding the similarity score between all pairs), we only compute the similarity score if they share a mutual k-mer. We first align the reads to the graph, two pair that align to the same node share a mutual k-mer. But of course, all the pairs share at least one node (node that contains the pattern). Based on the code coverage, we only take into account nodes whose multiplicity is 1. This section can be replaced by your method of choice. 
+3. Read Clustering: it finds the clusters based on the similarity between pairs. We used the Louvain community detection algorithm to do the clustering.
+4.Error correction. In this step, reads in the cluster are corrected independently.
+
 
 # Report bugs 
 Please report bugs to : Mahdi.Heydari@UGent.be
