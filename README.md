@@ -62,7 +62,7 @@ To run BrownieCorrector, you need to run the runPipeLine.sh script in the bashSc
     
 The first argument is inputReadFile is the Fastq file library in which the read pairs are interleaved.  Therefore two consecutive reads (one pair) must have an identical id. In case they have different tags, for example, @firstID/1 and @secondID/2,  remove the /1 and /2.  Also, please make sure that the file contains reads from a single library (same insert size). 
 
-The second argument is the coverage of the library. If you don't have the coverage but you know the approximate genome size you can compute the coverage like this: C = LN / G.
+The second argument is the coverage of the library. If you don't have the coverage but you know the approximate genome size you can compute the coverage like this: C = (L*N)/G.
     • C stands for coverage
     • G is the genome length
     • L is the read length
