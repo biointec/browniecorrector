@@ -12,6 +12,8 @@ Browniecorrector is a targeted error correction for short Illumina reads. unlike
 
 3.consistant error correction in each cluster independently from other clusters. 
 
+It has been shown that using BrownieCorrector prior to SPAdes can improve the quality of assembly.
+
 #  Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
@@ -104,4 +106,22 @@ Fourth:Error correction. In this step, reads in the cluster are corrected indepe
 Please report bugs to : Mahdi.Heydari@UGent.be
 
 # Citation
+@Article{Heydari2019,
+author="Heydari, Mahdi
+and Miclotte, Giles
+and Van de Peer, Yves
+and Fostier, Jan",
+title="Illumina error correction near highly repetitive DNA regions improves de novo genome assembly",
+journal="BMC Bioinformatics",
+year="2019",
+month="Jun",
+day="03",
+volume="20",
+number="1",
+pages="298",
+issn="1471-2105",
+doi="10.1186/s12859-019-2906-2",
+url="https://doi.org/10.1186/s12859-019-2906-2"
+}
+
 
